@@ -107,12 +107,7 @@ args = parser.parse_args()
 # Set target IP, port and command to send
 ip = args.target
 port = args.port
-if args.command is None:
-    cmd = args.json
-else:
-    cmd = commands[args.command]
-
-
+cmd = args.json if args.command is None else commands[args.command]
 # Send command and receive reply
 try:
     sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
