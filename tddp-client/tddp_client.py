@@ -53,7 +53,10 @@ def validHex(cmd):
         parser.error("Please issue a two-character hex command, e.g. 0A")
 
 # Parse commandline arguments
-parser = argparse.ArgumentParser(description="Experimental TP-Link TDDPv2 Client v" + str(version))
+parser = argparse.ArgumentParser(
+    description=f"Experimental TP-Link TDDPv2 Client v{str(version)}"
+)
+
 parser.add_argument("-v", "--verbose", help="Verbose mode", action="store_true")
 parser.add_argument("-t", "--target", metavar="<ip>", required=True, help="Target IP Address", type=validIP)
 parser.add_argument("-u", "--username", metavar="<username>", help="Username (default: admin)")
@@ -79,7 +82,7 @@ port_receive = 61000
 # Key is first 8 bytes only
 tddp_key = hashlib.md5(username.encode() + password.encode()).hexdigest()[:16]
 if args.verbose:
-    print("TDDP Key:\t", tddp_key, "(" + username + password + ")")
+    print("TDDP Key:\t", tddp_key, f"({username}{password})")
 
 ##  TDDP Header
 #    0                   1                   2                   3
@@ -203,8 +206,21 @@ sock_send.sendto(unhexlify(tddp_packet), (ip, port_send))
 if args.verbose:
     print("Raw Request:\t", tddp_packet)
 t = tddp_packet
-print("Request Data:\tVersion", t[0:2], "Type", t[2:4], "Status", t[6:8],
-      "Length", t[8:16], "ID", t[16:20], "Subtype", t[20:22])
+print(
+    "Request Data:\tVersion",
+    t[:2],
+    "Type",
+    t[2:4],
+    "Status",
+    t[6:8],
+    "Length",
+    t[8:16],
+    "ID",
+    t[16:20],
+    "Subtype",
+    t[20:22],
+)
+
 sock_send.close()
 
 # Receive the reply
@@ -213,12 +229,23 @@ r = hexlify(response).decode()
 if args.verbose:
     print("Raw Reply:\t", r)
 sock_receive.close()
-print("Reply Data:\tVersion", r[0:2], "Type", r[2:4], "Status", r[6:8],
-      "Length", r[8:16], "ID", r[16:20], "Subtype", r[20:22])
+print(
+    "Reply Data:\tVersion",
+    r[:2],
+    "Type",
+    r[2:4],
+    "Status",
+    r[6:8],
+    "Length",
+    r[8:16],
+    "ID",
+    r[16:20],
+    "Subtype",
+    r[20:22],
+)
 
-# Take payload and decrypt using key
-recv_data = r[56:]
-if recv_data:
-    print("Decrypted:\t", end="") 
+
+if recv_data := r[56:]:
+    print("Decrypted:\t", end="")
     print(key.decrypt(unhexlify(recv_data)))
 
